@@ -23,6 +23,7 @@ import logging
 import os
 import tempfile
 from typing import Optional
+from urllib.parse import urlparse
 
 import click
 from click.core import ParameterSource
@@ -553,17 +554,11 @@ def fast_api_common_options():
 
   def decorator(func):
     @click.option(
-        "--host",
+        "--base_url",
         type=str,
-        help="Optional. The binding host of the server",
-        default="127.0.0.1",
+        help="Optional. The base URL of the server.",
+        default="http://127\.0\.0\.1:8000",
         show_default=True,
-    )
-    @click.option(
-        "--port",
-        type=int,
-        help="Optional. The port of the server",
-        default=8000,
     )
     @click.option(
         "--allow_origins",
@@ -647,8 +642,7 @@ def cli_web(
     eval_storage_uri: Optional[str] = None,
     log_level: str = "INFO",
     allow_origins: Optional[list[str]] = None,
-    host: str = "127.0.0.1",
-    port: int = 8000,
+    base_url="http://127.0.0.1:8000",
     trace_to_cloud: bool = False,
     reload: bool = True,
     session_service_uri: Optional[str] = None,
@@ -669,6 +663,9 @@ def cli_web(
     adk web --session_service_uri=[uri] --port=[port] path/to/agents_dir
   """
   logs.setup_adk_logger(getattr(logging, log_level.upper()))
+  parsed_url = urlparse(base_url)
+  host = parsed_url.hostname
+  port = parsed_url.port
 
   @asynccontextmanager
   async def _lifespan(app: FastAPI):
@@ -705,8 +702,7 @@ def cli_web(
       trace_to_cloud=trace_to_cloud,
       lifespan=_lifespan,
       a2a=a2a,
-      host=host,
-      port=port,
+      base_url=base_url,
       reload_agents=reload_agents,
   )
   config = uvicorn.Config(
@@ -738,8 +734,7 @@ def cli_api_server(
     eval_storage_uri: Optional[str] = None,
     log_level: str = "INFO",
     allow_origins: Optional[list[str]] = None,
-    host: str = "127.0.0.1",
-    port: int = 8000,
+    base_url="http://127.0.0.1:8000",
     trace_to_cloud: bool = False,
     reload: bool = True,
     session_service_uri: Optional[str] = None,
@@ -761,6 +756,9 @@ def cli_api_server(
   """
   logs.setup_adk_logger(getattr(logging, log_level.upper()))
 
+  parsed_url = urlparse(base_url)
+  host = parsed_url.hostname
+  port = parsed_url.port
   session_service_uri = session_service_uri or session_db_url
   artifact_service_uri = artifact_service_uri or artifact_storage_uri
   config = uvicorn.Config(
@@ -774,8 +772,7 @@ def cli_api_server(
           web=False,
           trace_to_cloud=trace_to_cloud,
           a2a=a2a,
-          host=host,
-          port=port,
+          base_url=base_url,
           reload_agents=reload_agents,
       ),
       host=host,

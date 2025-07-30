@@ -64,8 +64,7 @@ def get_fast_api_app(
     allow_origins: Optional[list[str]] = None,
     web: bool,
     a2a: bool = False,
-    host: str = "127.0.0.1",
-    port: int = 8000,
+    base_url: str = "http://127.0.0.1:8000",
     trace_to_cloud: bool = False,
     reload_agents: bool = False,
     lifespan: Optional[Lifespan[FastAPI]] = None,
@@ -352,7 +351,7 @@ def get_fast_api_app(
         logger.info("Setting up A2A agent: %s", app_name)
 
         try:
-          a2a_rpc_path = f"http://{host}:{port}/a2a/{app_name}"
+          a2a_rpc_path = f"{base_url}/a2a/{app_name}"
 
           agent_executor = A2aAgentExecutor(
               runner=create_a2a_runner_loader(app_name),

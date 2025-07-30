@@ -432,8 +432,7 @@ def test_app(
         memory_service_uri="",
         allow_origins=["*"],
         a2a=False,  # Disable A2A for most tests
-        host="127.0.0.1",
-        port=8000,
+        base_url="http://127.0.0.1:8000",
     )
 
     # Create a TestClient that doesn't start a real server
@@ -607,8 +606,7 @@ def test_app_with_a2a(
           memory_service_uri="",
           allow_origins=["*"],
           a2a=True,
-          host="127.0.0.1",
-          port=8000,
+          base_url="http://127.0.0.1:8000",
       )
 
       client = TestClient(app)
