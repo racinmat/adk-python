@@ -185,7 +185,8 @@ When deploying the remote BigQuery A2A agent to different environments (e.g., Cl
 }
 ```
 
-**Important:** The `url` field in `remote_a2a/bigquery_agent/agent.json` must point to the actual RPC endpoint where your remote BigQuery A2A agent is deployed and accessible.
+**Important:** The `url` field in `remote_a2a/bigquery_agent/agent.json` must point to the actual RPC endpoint where your remote BigQuery A2A agent is deployed and accessible. 
+If the `url` field is an empty string, it will be automatically filled by the `--host` and `--port`, or `--base_url` provided to `adk api_server`.
 
 ## Troubleshooting
 
@@ -193,7 +194,7 @@ When deploying the remote BigQuery A2A agent to different environments (e.g., Cl
 - Ensure the local ADK web server is running on port 8000
 - Ensure the remote A2A server is running on port 8001
 - Check that no firewall is blocking localhost connections
-- **Verify the `url` field in `remote_a2a/bigquery_agent/agent.json` matches the actual deployed location of your remote A2A server**
+- **Verify the `url` field in `remote_a2a/bigquery_agent/agent.json` matches the actual deployed location of your remote A2A server, or if it's empty, make sure the `--host` and `--port`, or `--base_url` provided to `adk api_server` match the actual deployed location of your remote A2A server**
 - Verify the agent card URL passed to RemoteA2AAgent constructor matches the running A2A server
 
 

@@ -23,6 +23,7 @@ import logging
 import os
 import tempfile
 from typing import Optional
+from urllib.parse import urlparse
 
 import click
 from click.core import ParameterSource
@@ -629,6 +630,16 @@ def fast_api_common_options():
         default=8000,
     )
     @click.option(
+        "--base_url",
+        type=str,
+        help=(
+            "Optional. The base URL of the server. "
+            "Mutually exclusive with --host and --port. "
+            "Overrides the values of --host and --port if specified."
+        ),
+        show_default=True,
+    )
+    @click.option(
         "--allow_origins",
         help="Optional. Any additional origins to allow for CORS.",
         multiple=True,
@@ -721,6 +732,7 @@ def cli_web(
     allow_origins: Optional[list[str]] = None,
     host: str = "127.0.0.1",
     port: int = 8000,
+    base_url: Optional[str] = None,
     trace_to_cloud: bool = False,
     reload: bool = True,
     session_service_uri: Optional[str] = None,
@@ -741,6 +753,16 @@ def cli_web(
     adk web --session_service_uri=[uri] --port=[port] path/to/agents_dir
   """
   logs.setup_adk_logger(getattr(logging, log_level.upper()))
+  if base_url is None:
+    base_url = f"http://{host}:{port}"
+  else:
+    parsed_url = urlparse(base_url)
+    host = parsed_url.hostname
+    port = parsed_url.port
+    logging.debug(
+        f"Ignoring --host and --port parameters, because --base-url is"
+        f" specified."
+    )
 
   @asynccontextmanager
   async def _lifespan(app: FastAPI):
@@ -749,7 +771,7 @@ def cli_web(
 +-----------------------------------------------------------------------------+
 | ADK Web Server started                                                      |
 |                                                                             |
-| For local testing, access at http://{host}:{port}.{" "*(29 - len(str(port)))}|
+| For local testing, access at {base_url}.{" "*(29 - len(str(port)))}|
 +-----------------------------------------------------------------------------+
 """,
         fg="green",
@@ -777,8 +799,7 @@ def cli_web(
       trace_to_cloud=trace_to_cloud,
       lifespan=_lifespan,
       a2a=a2a,
-      host=host,
-      port=port,
+      base_url=base_url,
       reload_agents=reload_agents,
   )
   config = uvicorn.Config(
@@ -812,6 +833,7 @@ def cli_api_server(
     allow_origins: Optional[list[str]] = None,
     host: str = "127.0.0.1",
     port: int = 8000,
+    base_url: Optional[str] = None,
     trace_to_cloud: bool = False,
     reload: bool = True,
     session_service_uri: Optional[str] = None,
@@ -833,6 +855,16 @@ def cli_api_server(
   """
   logs.setup_adk_logger(getattr(logging, log_level.upper()))
 
+  if base_url is None:
+    base_url = f"http://{host}:{port}"
+  else:
+    parsed_url = urlparse(base_url)
+    host = parsed_url.hostname
+    port = parsed_url.port
+    logging.debug(
+        f"Ignoring --host and --port parameters, because --base-url is"
+        f" specified."
+    )
   session_service_uri = session_service_uri or session_db_url
   artifact_service_uri = artifact_service_uri or artifact_storage_uri
   config = uvicorn.Config(
@@ -846,8 +878,7 @@ def cli_api_server(
           web=False,
           trace_to_cloud=trace_to_cloud,
           a2a=a2a,
-          host=host,
-          port=port,
+          base_url=base_url,
           reload_agents=reload_agents,
       ),
       host=host,
