@@ -24,6 +24,7 @@ from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from google.adk.agents.base_agent import BaseAgent
 from google.adk.agents.run_config import RunConfig
@@ -893,6 +894,93 @@ def test_a2a_disabled_by_default(test_app):
   response = test_app.get("/list-apps")
   assert response.status_code == 200
   logger.info("A2A disabled by default test passed")
+
+
+def test_runtime_config_contains_base_url(test_app):
+  """Test that ./assets/config/runtime-config.json contains the base_url passed to the FastAPI app."""
+  # The test_app fixture configures the FastAPI app with base_url="http://127.0.0.1:8000"
+  expected_base_url = "http://127.0.0.1:8000"
+  
+  # Make a request to the runtime config endpoint
+  response = test_app.get("/dev-ui/assets/config/runtime-config.json")
+  
+  # Verify the response
+  assert response.status_code == 200
+  data = response.json()
+  
+  # Verify the structure and content
+  assert isinstance(data, dict)
+  assert "backendUrl" in data
+  assert data["backendUrl"] == expected_base_url
+  
+  logger.info(f"Runtime config test passed - base_url: {data['backendUrl']}")
+
+
+def test_runtime_config_with_custom_base_url(
+    mock_session_service,
+    mock_artifact_service,
+    mock_memory_service,
+    mock_agent_loader,
+    mock_eval_sets_manager,
+    mock_eval_set_results_manager,
+):
+  """Test that runtime-config.json contains a custom base_url when provided."""
+  custom_base_url = "https://example.com:9000/adk"
+  
+  # Create a FastAPI app with a custom base_url
+  with (
+      patch("signal.signal", return_value=None),
+      patch(
+          "google.adk.cli.fast_api.InMemorySessionService",
+          return_value=mock_session_service,
+      ),
+      patch(
+          "google.adk.cli.fast_api.InMemoryArtifactService",
+          return_value=mock_artifact_service,
+      ),
+      patch(
+          "google.adk.cli.fast_api.InMemoryMemoryService",
+          return_value=mock_memory_service,
+      ),
+      patch(
+          "google.adk.cli.fast_api.AgentLoader",
+          return_value=mock_agent_loader,
+      ),
+      patch(
+          "google.adk.cli.fast_api.LocalEvalSetsManager",
+          return_value=mock_eval_sets_manager,
+      ),
+      patch(
+          "google.adk.cli.fast_api.LocalEvalSetResultsManager",
+          return_value=mock_eval_set_results_manager,
+      ),
+  ):
+    adk_app = get_fast_api_app(
+        agents_dir=".",
+        web=True,
+        session_service_uri="",
+        artifact_service_uri="",
+        memory_service_uri="",
+        allow_origins=["*"],
+        a2a=False,
+        base_url=custom_base_url,
+    )
+    app = FastAPI()
+    app.mount("/adk", adk_app)
+    
+    client = TestClient(app)
+    
+    # Make a request to the runtime config endpoint
+    response = client.get("/adk/dev-ui/assets/config/runtime-config.json")
+    
+    # Verify the response contains the custom base_url
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, dict)
+    assert "backendUrl" in data
+    assert data["backendUrl"] == custom_base_url
+    
+    logger.info(f"Custom runtime config test passed - base_url: {data['backendUrl']}")
 
 
 if __name__ == "__main__":

@@ -27,9 +27,12 @@ import click
 from fastapi import FastAPI
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
 from fastapi.responses import PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from opentelemetry.sdk.trace import export
 from opentelemetry.sdk.trace import TracerProvider
+from starlette.responses import Response
 from starlette.types import Lifespan
 from watchdog.observers import Observer
 
@@ -188,7 +191,9 @@ def get_fast_api_app(
   )
 
   # Callbacks & other optional args for when constructing the FastAPI instance
-  extra_fast_api_args = {}
+  extra_fast_api_args = dict(
+      base_url=base_url,
+  )
 
   if trace_to_cloud:
     from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter

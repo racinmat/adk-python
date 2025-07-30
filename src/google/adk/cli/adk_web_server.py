@@ -18,6 +18,7 @@ import asyncio
 from contextlib import asynccontextmanager
 import logging
 import os
+from pathlib import Path
 import time
 import traceback
 import typing
@@ -31,6 +32,7 @@ from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi import Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -44,6 +46,8 @@ from opentelemetry.sdk.trace import ReadableSpan
 from opentelemetry.sdk.trace import TracerProvider
 from pydantic import Field
 from pydantic import ValidationError
+from starlette.responses import Response
+from starlette.staticfiles import PathLike
 from starlette.types import Lifespan
 from typing_extensions import override
 from watchdog.observers import Observer
@@ -193,6 +197,28 @@ class GetEventGraphResult(common.BaseModel):
   dot_src: str
 
 
+class ConfigInjectingStaticFiles(StaticFiles):
+  """
+  Custom StaticFiles that injects config.json for dev-ui.
+  Fixes https://github.com/google/adk-python/issues/2072
+  """
+
+  def __init__(self, *, directory: PathLike | None = None, base_url: Optional[str] = None, **kwargs):
+    super().__init__(directory=directory, **kwargs)
+    if base_url is None:
+      base_url = ""
+    self.base_url = base_url
+
+  async def get_response(self, path: str, scope) -> Response:
+    # Check if the request is for config.json
+    if Path(path).as_posix() == "assets/config/runtime-config.json":
+      config = {"backendUrl": self.base_url}
+      return JSONResponse(content=config)
+
+    # Otherwise, serve static files normally
+    return await super().get_response(path, scope)
+
+
 class AdkWebServer:
   """Helper class for setting up and running the ADK web server on FastAPI.
 
@@ -284,6 +310,7 @@ class AdkWebServer:
           [Observer, "AdkWebServer"], None
       ] = lambda o, s: None,
       register_processors: Callable[[TracerProvider], None] = lambda o: None,
+      base_url: Optional[str] = None,
   ):
     """Creates a FastAPI app for the ADK web server.
 
@@ -300,6 +327,8 @@ class AdkWebServer:
       tear_down_observer: Callback for cleaning up the file system observer.
       register_processors: Callback for additional Span processors to be added
         to the TracerProvider.
+      base_url: The base URL for the web-ui, useful if fastapi app is mounted as
+        a sub-application. If none is provided, the host is used in the frontend.
 
     Returns:
       A FastAPI app instance.
@@ -996,7 +1025,12 @@ class AdkWebServer:
 
       app.mount(
           "/dev-ui/",
-          StaticFiles(directory=web_assets_dir, html=True, follow_symlink=True),
+          ConfigInjectingStaticFiles(
+              directory=web_assets_dir,
+              base_url=base_url,
+              html=True,
+              follow_symlink=True,
+          ),
           name="static",
       )
 
