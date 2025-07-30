@@ -145,9 +145,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(
-        self.mock_agent, host="example.com", port=9000, protocol="https"
-    )
+    result = to_a2a(self.mock_agent, base_url="https://example.com:9000")
 
     # Assert
     assert result == mock_app
@@ -524,7 +522,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, port=0)
+    result = to_a2a(self.mock_agent, base_url="http://localhost:0/")
 
     # Assert
     assert result == mock_app
@@ -559,7 +557,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, host="")
+    result = to_a2a(self.mock_agent, base_url="http://:8000/")
 
     # Assert
     assert result == mock_app
@@ -594,7 +592,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, port=-1)
+    result = to_a2a(self.mock_agent, base_url="http://localhost:-1/")
 
     # Assert
     assert result == mock_app
@@ -664,7 +662,9 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, host="test-host.example.com")
+    result = to_a2a(
+        self.mock_agent, base_url="http://test-host.example.com:8000/"
+    )
 
     # Assert
     assert result == mock_app
@@ -699,7 +699,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, host="192.168.1.1")
+    result = to_a2a(self.mock_agent, base_url="http://192.168.1.1:8000/")
 
     # Assert
     assert result == mock_app
@@ -734,7 +734,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, protocol="https")
+    result = to_a2a(self.mock_agent, base_url="https://localhost:8000/")
 
     # Assert
     assert result == mock_app
@@ -769,7 +769,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(self.mock_agent, protocol="ws")
+    result = to_a2a(self.mock_agent, base_url="ws://localhost:8000/")
 
     # Assert
     assert result == mock_app
@@ -804,9 +804,7 @@ class TestToA2A:
     mock_card_builder_class.return_value = mock_card_builder
 
     # Act
-    result = to_a2a(
-        self.mock_agent, host="api.example.com", port=443, protocol="https"
-    )
+    result = to_a2a(self.mock_agent, base_url="https://api.example.com")
 
     # Assert
     assert result == mock_app

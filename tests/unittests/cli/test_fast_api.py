@@ -24,6 +24,7 @@ from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
+from a2a.utils import AGENT_CARD_WELL_KNOWN_PATH
 from fastapi.testclient import TestClient
 from google.adk.agents.base_agent import BaseAgent
 from google.adk.agents.run_config import RunConfig
@@ -432,8 +433,7 @@ def test_app(
         memory_service_uri="",
         allow_origins=["*"],
         a2a=False,  # Disable A2A for most tests
-        host="127.0.0.1",
-        port=8000,
+        base_url="http://127.0.0.1:8000",
     )
 
     # Create a TestClient that doesn't start a real server
@@ -502,11 +502,22 @@ def temp_agents_dir_with_a2a():
 
     # Create agent.json file
     agent_card = {
+        "capabilities": {"pushNotifications": True, "streaming": True},
+        "defaultInputModes": ["text", "text/plain"],
+        "defaultOutputModes": ["text", "text/plain"],
         "name": "test_a2a_agent",
         "description": "Test A2A agent",
         "version": "1.0.0",
         "author": "test",
-        "capabilities": ["text"],
+        "protocolVersion": "0.2.6",
+        "skills": [{
+            "description": "Makes the tests pass",
+            "examples": ["Fix the tests."],
+            "id": "test_a2a_agent",
+            "name": "Test A2A agent",
+            "tags": ["testing"],
+        }],
+        "url": "",
     }
 
     with open(agent_dir / "agent.json", "w") as f:
@@ -580,19 +591,11 @@ def test_app_with_a2a(
       patch(
           "a2a.server.request_handlers.DefaultRequestHandler"
       ) as mock_handler,
-      patch("a2a.server.apps.A2AStarletteApplication") as mock_a2a_app,
   ):
     # Configure mocks
     mock_task_store.return_value = MagicMock()
     mock_executor.return_value = MagicMock()
     mock_handler.return_value = MagicMock()
-
-    # Mock A2AStarletteApplication
-    mock_app_instance = MagicMock()
-    mock_app_instance.routes.return_value = (
-        []
-    )  # Return empty routes for testing
-    mock_a2a_app.return_value = mock_app_instance
 
     # Change to temp directory
     original_cwd = os.getcwd()
@@ -607,8 +610,7 @@ def test_app_with_a2a(
           memory_service_uri="",
           allow_origins=["*"],
           a2a=True,
-          host="127.0.0.1",
-          port=8000,
+          base_url="http://127.0.0.1:8000",
       )
 
       client = TestClient(app)
@@ -881,9 +883,14 @@ def test_debug_trace(test_app):
 )
 def test_a2a_agent_discovery(test_app_with_a2a):
   """Test that A2A agents are properly discovered and configured."""
-  # This test mainly verifies that the A2A setup doesn't break the app
+  # This test verifies that the A2A setup doesn't break the app
+  # and that the well known card works
   response = test_app_with_a2a.get("/list-apps")
   assert response.status_code == 200
+  response2 = test_app_with_a2a.get(
+      f"/a2a/test_a2a_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+  )
+  assert response2.status_code == 200
   logger.info("A2A agent discovery test passed")
 
 

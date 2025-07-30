@@ -47,17 +47,13 @@ from .agent_card_builder import AgentCardBuilder
 def to_a2a(
     agent: BaseAgent,
     *,
-    host: str = "localhost",
-    port: int = 8000,
-    protocol: str = "http",
+    base_url: str = "http://localhost:8000/",
 ) -> Starlette:
   """Convert an ADK agent to a A2A Starlette application.
 
   Args:
       agent: The ADK agent to convert
-      host: The host for the A2A RPC URL (default: "localhost")
-      port: The port for the A2A RPC URL (default: 8000)
-      protocol: The protocol for the A2A RPC URL (default: "http")
+      base_url: The base URL for the A2A RPC URL (default: "http://localhost:8000/")
 
   Returns:
       A Starlette application that can be run with uvicorn
@@ -94,10 +90,9 @@ def to_a2a(
   )
 
   # Build agent card
-  rpc_url = f"{protocol}://{host}:{port}/"
   card_builder = AgentCardBuilder(
       agent=agent,
-      rpc_url=rpc_url,
+      rpc_url=base_url,
   )
 
   # Create a Starlette app that will be configured during startup
