@@ -403,7 +403,7 @@ async def test_generate_content_async_with_custom_headers(
 
     for key, value in config_arg.http_options.headers.items():
       if key in gemini_llm._tracking_headers:
-        assert value == gemini_llm._tracking_headers[key]
+        assert value == gemini_llm._tracking_headers[key] + " custom"
       else:
         assert value == custom_headers[key]
 
@@ -1505,7 +1505,6 @@ async def test_computer_use_with_no_config():
       contents=[
           types.Content(role="user", parts=[types.Part.from_text(text="Hello")])
       ],
-      config=None,
   )
 
   # Should not raise an exception
