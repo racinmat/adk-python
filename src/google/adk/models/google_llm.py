@@ -75,9 +75,9 @@ class Gemini(BaseLlm):
   ```
   """
 
-  @staticmethod
+  @classmethod
   @override
-  def supported_models() -> list[str]:
+  def supported_models(cls) -> list[str]:
     """Provides the list of supported models.
 
     Returns:
@@ -289,6 +289,7 @@ class Gemini(BaseLlm):
         ],
     )
     llm_request.live_connect_config.tools = llm_request.config.tools
+    logger.info('Connecting to live with llm_request:%s', llm_request)
     async with self._live_api_client.aio.live.connect(
         model=llm_request.model, config=llm_request.live_connect_config
     ) as live_session:

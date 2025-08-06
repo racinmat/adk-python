@@ -226,7 +226,7 @@ def validate_exclusive(ctx, param, value):
     help=(
         "The json file that contains the initial state of the session and user"
         " queries. A new session will be created using this state. And user"
-        " queries are run againt the newly created session. Users cannot"
+        " queries are run against the newly created session. Users cannot"
         " continue to interact with the agent."
     ),
     callback=validate_exclusive,
@@ -671,6 +671,15 @@ def fast_api_common_options():
         show_default=True,
         help="Optional. Whether to enable live reload for agents changes.",
     )
+    @click.option(
+        "--eval_storage_uri",
+        type=str,
+        help=(
+            "Optional. The evals storage URI to store agent evals,"
+            " supported URIs: gs://<bucket name>."
+        ),
+        default=None,
+    )
     @functools.wraps(func)
     @click.pass_context
     def wrapper(ctx, *args, **kwargs):
@@ -918,6 +927,12 @@ def cli_api_server(
     ),
 )
 @click.option(
+    "--log_level",
+    type=LOG_LEVELS,
+    default="INFO",
+    help="Optional. Set the logging level",
+)
+@click.option(
     "--verbosity",
     type=LOG_LEVELS,
     help="Deprecated. Use --log_level instead.",
@@ -938,6 +953,19 @@ def cli_api_server(
         " version in the dev environment)"
     ),
 )
+@click.option(
+    "--a2a",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Optional. Whether to enable A2A endpoint.",
+)
+@click.option(
+    "--allow_origins",
+    help="Optional. Any additional origins to allow for CORS.",
+    multiple=True,
+)
+# TODO: Add eval_storage_uri option back when evals are supported in Cloud Run.
 @adk_services_options()
 @deprecated_adk_services_options()
 def cli_deploy_cloud_run(
@@ -951,18 +979,15 @@ def cli_deploy_cloud_run(
     trace_to_cloud: bool,
     with_ui: bool,
     adk_version: str,
-    verbosity: str = "WARNING",
-    reload: bool = True,
+    log_level: str,
+    verbosity: Optional[str],
     allow_origins: Optional[list[str]] = None,
-    log_level: Optional[str] = None,
     session_service_uri: Optional[str] = None,
     artifact_service_uri: Optional[str] = None,
     memory_service_uri: Optional[str] = None,
-    eval_storage_uri: Optional[str] = None,
     session_db_url: Optional[str] = None,  # Deprecated
     artifact_storage_uri: Optional[str] = None,  # Deprecated
     a2a: bool = False,
-    reload_agents: bool = False,
 ):
   """Deploys an agent to Cloud Run.
 
@@ -972,7 +997,14 @@ def cli_deploy_cloud_run(
 
     adk deploy cloud_run --project=[project] --region=[region] path/to/my_agent
   """
-  log_level = log_level or verbosity
+  if verbosity:
+    click.secho(
+        "WARNING: The --verbosity option is deprecated. Use --log_level"
+        " instead.",
+        fg="yellow",
+        err=True,
+    )
+
   session_service_uri = session_service_uri or session_db_url
   artifact_service_uri = artifact_service_uri or artifact_storage_uri
   try:
