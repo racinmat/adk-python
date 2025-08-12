@@ -620,7 +620,7 @@ def fast_api_common_options():
         "--base_url",
         type=str,
         help="Optional. The base URL of the server.",
-        default="http://127\.0\.0\.1:8000",
+        default="http://127.0.0.1:8000",
         show_default=True,
     )
     @click.option(
