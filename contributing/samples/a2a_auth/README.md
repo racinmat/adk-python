@@ -185,7 +185,7 @@ When deploying the remote BigQuery A2A agent to different environments (e.g., Cl
 }
 ```
 
-**Important:** The `url` field in `remote_a2a/bigquery_agent/agent.json` must point to the actual RPC endpoint where your remote BigQuery A2A agent is deployed and accessible.
+**Important:** The `url` field in `remote_a2a/bigquery_agent/agent.json` must point to the actual RPC endpoint where your remote BigQuery A2A agent is deployed and accessible. If the `url` field is an empty string, it will be automatically filled by the base URL provided to `get_fast_api_app`.
 
 ## Troubleshooting
 

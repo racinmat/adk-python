@@ -364,8 +364,8 @@ def get_fast_api_app(
           with (p / "agent.json").open("r", encoding="utf-8") as f:
             data = json.load(f)
             agent_card = AgentCard(**data)
-            # todo: if url is not defined, override it here
-            agent_card.url = a2a_rpc_path
+            if agent_card.url == "":    # empty url is a placeholder to be filled with the provided url
+                agent_card.url = a2a_rpc_path
 
           a2a_app = A2AStarletteApplication(
               agent_card=agent_card,
