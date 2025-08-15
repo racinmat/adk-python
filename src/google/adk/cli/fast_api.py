@@ -188,7 +188,9 @@ def get_fast_api_app(
   )
 
   # Callbacks & other optional args for when constructing the FastAPI instance
-  extra_fast_api_args = {}
+  extra_fast_api_args = dict(
+      base_url=base_url,
+  )
 
   if trace_to_cloud:
     from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
