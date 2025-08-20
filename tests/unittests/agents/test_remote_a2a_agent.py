@@ -112,27 +112,27 @@ class TestRemoteA2aAgentInit:
   def test_init_with_url_string(self):
     """Test initialization with URL string."""
     agent = RemoteA2aAgent(
-        name="test_agent", agent_card="https://example.com/agent.json"
+        name="test_agent", agent_card="https://example.com/agent-card.json"
     )
 
     assert agent.name == "test_agent"
     assert agent._agent_card is None
-    assert agent._agent_card_source == "https://example.com/agent.json"
+    assert agent._agent_card_source == "https://example.com/agent-card.json"
 
   def test_init_with_file_path(self):
     """Test initialization with file path."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent.json")
+    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
 
     assert agent.name == "test_agent"
     assert agent._agent_card is None
-    assert agent._agent_card_source == "/path/to/agent.json"
+    assert agent._agent_card_source == "/path/to/agent-card.json"
 
   def test_init_with_shared_httpx_client(self):
     """Test initialization with shared httpx client."""
     httpx_client = httpx.AsyncClient()
     agent = RemoteA2aAgent(
         name="test_agent",
-        agent_card="https://example.com/agent.json",
+        agent_card="https://example.com/agent-card.json",
         httpx_client=httpx_client,
     )
 
@@ -158,7 +158,7 @@ class TestRemoteA2aAgentInit:
     """Test initialization with custom timeout."""
     agent = RemoteA2aAgent(
         name="test_agent",
-        agent_card="https://example.com/agent.json",
+        agent_card="https://example.com/agent-card.json",
         timeout=300.0,
     )
 
@@ -219,7 +219,7 @@ class TestRemoteA2aAgentResolution:
   async def test_resolve_agent_card_from_url_success(self):
     """Test successful agent card resolution from URL."""
     agent = RemoteA2aAgent(
-        name="test_agent", agent_card="https://example.com/agent.json"
+        name="test_agent", agent_card="https://example.com/agent-card.json"
     )
 
     with patch.object(agent, "_ensure_httpx_client") as mock_ensure_client:
@@ -234,7 +234,7 @@ class TestRemoteA2aAgentResolution:
         mock_resolver_class.return_value = mock_resolver
 
         result = await agent._resolve_agent_card_from_url(
-            "https://example.com/agent.json"
+            "https://example.com/agent-card.json"
         )
 
         assert result == self.agent_card
@@ -242,7 +242,7 @@ class TestRemoteA2aAgentResolution:
             httpx_client=mock_client, base_url="https://example.com"
         )
         mock_resolver.get_agent_card.assert_called_once_with(
-            relative_card_path="/agent.json"
+            relative_card_path="/agent-card.json"
         )
 
   @pytest.mark.asyncio
@@ -256,7 +256,7 @@ class TestRemoteA2aAgentResolution:
   @pytest.mark.asyncio
   async def test_resolve_agent_card_from_file_success(self):
     """Test successful agent card resolution from file."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent.json")
+    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".json", delete=False
@@ -286,7 +286,7 @@ class TestRemoteA2aAgentResolution:
   @pytest.mark.asyncio
   async def test_resolve_agent_card_from_file_invalid_json(self):
     """Test agent card resolution from file with invalid JSON raises error."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent.json")
+    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".json", delete=False
@@ -393,7 +393,7 @@ class TestRemoteA2aAgentResolution:
   async def test_ensure_resolved_with_url_source(self):
     """Test _ensure_resolved with URL source."""
     agent = RemoteA2aAgent(
-        name="test_agent", agent_card="https://example.com/agent.json"
+        name="test_agent", agent_card="https://example.com/agent-card.json"
     )
 
     agent_card = create_test_agent_card()

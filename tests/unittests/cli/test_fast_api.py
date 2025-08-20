@@ -500,7 +500,7 @@ def temp_agents_dir_with_a2a():
     agent_dir = Path(temp_dir) / "test_a2a_agent"
     agent_dir.mkdir()
 
-    # Create agent.json file
+    # Create agent-card.json file
     agent_card = {
         "name": "test_a2a_agent",
         "description": "Test A2A agent",
@@ -509,7 +509,7 @@ def temp_agents_dir_with_a2a():
         "capabilities": ["text"],
     }
 
-    with open(agent_dir / "agent.json", "w") as f:
+    with open(agent_dir / "agent-card.json", "w") as f:
       json.dump(agent_card, f)
 
     # Create a simple agent.py file
