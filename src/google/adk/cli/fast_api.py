@@ -23,6 +23,7 @@ from typing import Any
 from typing import Mapping
 from typing import Optional
 
+from a2a.server.apps import A2AFastAPIApplication
 import click
 from fastapi import FastAPI
 from fastapi import UploadFile
@@ -364,18 +365,12 @@ def get_fast_api_app(
             data = json.load(f)
             agent_card = AgentCard(**data)
 
-          a2a_app = A2AStarletteApplication(
+          a2a_app = A2AFastAPIApplication(
               agent_card=agent_card,
               http_handler=request_handler,
-          )
+          ).build()
 
-          routes = a2a_app.routes(
-              rpc_url=f"/a2a/{app_name}",
-              agent_card_url=f"/a2a/{app_name}{AGENT_CARD_WELL_KNOWN_PATH}",
-          )
-
-          for new_route in routes:
-            app.router.routes.append(new_route)
+          app.mount(f"/a2a/{app_name}", a2a_app)
 
           logger.info("Successfully configured A2A agent: %s", app_name)
 
