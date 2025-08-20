@@ -930,6 +930,10 @@ def test_runtime_config_contains_base_url(test_app):
   assert response.status_code == 200
   data = response.json()
 
+  # Test that / redirects to /dev-ui/ 
+  response2 = test_app.get("/", follow_redirects=False)
+  assert response2.status_code == 307
+  assert response2.headers["location"] == "/dev-ui/"
   # Verify the structure and content
   assert isinstance(data, dict)
   assert "backendUrl" in data
@@ -994,6 +998,11 @@ def test_runtime_config_with_custom_base_url(
 
     # Make a request to the runtime config endpoint
     response = client.get("/adk/dev-ui/assets/config/runtime-config.json")
+
+    # Test that /adk/ redirects to /adk/dev-ui/
+    response2 = client.get("/adk/", follow_redirects=False)
+    assert response2.status_code == 307
+    assert response2.headers["location"] == "/adk/dev-ui/"
 
     # Verify the response contains the custom base_url
     assert response.status_code == 200

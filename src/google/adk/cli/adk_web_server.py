@@ -46,6 +46,7 @@ from opentelemetry.sdk.trace import ReadableSpan
 from opentelemetry.sdk.trace import TracerProvider
 from pydantic import Field
 from pydantic import ValidationError
+from starlette.requests import Request
 from starlette.responses import Response
 from starlette.staticfiles import PathLike
 from starlette.types import Lifespan
@@ -1046,12 +1047,14 @@ class AdkWebServer:
       mimetypes.add_type("text/javascript", ".js", True)
 
       @app.get("/")
-      async def redirect_root_to_dev_ui():
-        return RedirectResponse("/dev-ui/")
+      async def redirect_root_to_dev_ui(request: Request):
+        root_path = request.scope.get("root_path", "")
+        return RedirectResponse(f"{root_path}/dev-ui/")
 
       @app.get("/dev-ui")
-      async def redirect_dev_ui_add_slash():
-        return RedirectResponse("/dev-ui/")
+      async def redirect_dev_ui_add_slash(request: Request):
+        root_path = request.scope.get("root_path", "")
+        return RedirectResponse(f"{root_path}/dev-ui/")
 
       app.mount(
           "/dev-ui/",
