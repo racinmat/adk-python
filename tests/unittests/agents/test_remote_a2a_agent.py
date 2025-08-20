@@ -121,7 +121,9 @@ class TestRemoteA2aAgentInit:
 
   def test_init_with_file_path(self):
     """Test initialization with file path."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
+    agent = RemoteA2aAgent(
+        name="test_agent", agent_card="/path/to/agent-card.json"
+    )
 
     assert agent.name == "test_agent"
     assert agent._agent_card is None
@@ -256,7 +258,9 @@ class TestRemoteA2aAgentResolution:
   @pytest.mark.asyncio
   async def test_resolve_agent_card_from_file_success(self):
     """Test successful agent card resolution from file."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
+    agent = RemoteA2aAgent(
+        name="test_agent", agent_card="/path/to/agent-card.json"
+    )
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".json", delete=False
@@ -286,7 +290,9 @@ class TestRemoteA2aAgentResolution:
   @pytest.mark.asyncio
   async def test_resolve_agent_card_from_file_invalid_json(self):
     """Test agent card resolution from file with invalid JSON raises error."""
-    agent = RemoteA2aAgent(name="test_agent", agent_card="/path/to/agent-card.json")
+    agent = RemoteA2aAgent(
+        name="test_agent", agent_card="/path/to/agent-card.json"
+    )
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".json", delete=False
