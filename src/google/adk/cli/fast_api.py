@@ -23,7 +23,6 @@ from typing import Any
 from typing import Mapping
 from typing import Optional
 
-from a2a.server.apps import A2AFastAPIApplication
 import click
 from fastapi import FastAPI
 from fastapi import UploadFile
@@ -307,7 +306,7 @@ def get_fast_api_app(
 
   if a2a:
     try:
-      from a2a.server.apps import A2AStarletteApplication
+      from a2a.server.apps import A2AFastAPIApplication
       from a2a.server.request_handlers import DefaultRequestHandler
       from a2a.server.tasks import InMemoryTaskStore
       from a2a.types import AgentCard

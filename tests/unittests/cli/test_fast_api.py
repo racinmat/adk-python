@@ -504,36 +504,21 @@ def temp_agents_dir_with_a2a():
 
     # Create agent.json file
     agent_card = {
-        "capabilities": {
-            "pushNotifications": True,
-            "streaming": True
-        },
-        "defaultInputModes": [
-            "text",
-            "text/plain"
-        ],
-        "defaultOutputModes": [
-            "text",
-            "text/plain"
-        ],
+        "capabilities": {"pushNotifications": True, "streaming": True},
+        "defaultInputModes": ["text", "text/plain"],
+        "defaultOutputModes": ["text", "text/plain"],
         "name": "test_a2a_agent",
         "description": "Test A2A agent",
         "version": "1.0.0",
         "author": "test",
         "protocolVersion": "0.2.6",
-        "skills": [
-            {
-                "description": "Makes the tests pass",
-                "examples": [
-                    "Fix the tests."
-                ],
-                "id": "test_a2a_agent",
-                "name": "Test A2A agent",
-                "tags": [
-                    "testing"
-                ]
-            }
-        ],
+        "skills": [{
+            "description": "Makes the tests pass",
+            "examples": ["Fix the tests."],
+            "id": "test_a2a_agent",
+            "name": "Test A2A agent",
+            "tags": ["testing"],
+        }],
         "url": "",
     }
 
@@ -905,10 +890,14 @@ def test_a2a_agent_discovery(test_app_with_a2a):
   # and that the well known card works
   response = test_app_with_a2a.get("/list-apps")
   assert response.status_code == 200
-  response2 = test_app_with_a2a.get(f"/a2a/test_a2a_agent{AGENT_CARD_WELL_KNOWN_PATH}")
+  response2 = test_app_with_a2a.get(
+      f"/a2a/test_a2a_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+  )
   assert response2.status_code == 200
   # testing backward compatibility
-  response3 = test_app_with_a2a.get(f"/a2a/test_a2a_agent{PREV_AGENT_CARD_WELL_KNOWN_PATH}")
+  response3 = test_app_with_a2a.get(
+      f"/a2a/test_a2a_agent{PREV_AGENT_CARD_WELL_KNOWN_PATH}"
+  )
   assert response3.status_code == 200
   response4 = test_app_with_a2a.get(f"/a2a/test_a2a_agent/openapi.json")
   assert response4.status_code == 200
